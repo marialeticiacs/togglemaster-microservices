@@ -1,0 +1,66 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: togglemaster-ingress
+  namespace: togglemaster
+  annotations:
+    # Diz ao EKS para provisionar um ALB (Application Load Balancer)
+    kubernetes.io/ingress.class: alb
+    
+    # Define que o LB deve ser público (acessível via internet)
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    
+    # Importante: "ip" faz o tráfego ir direto para os Pods (menor latência)
+    # Se não usar isso, ele vai para os NodePorts (modo legado)
+    alb.ingress.kubernetes.io/target-type: ip
+    
+    # (Opcional) Se você criou o WAF no passo anterior, descomente e coloque o ARN aqui:
+    # alb.ingress.kubernetes.io/wafv2-acl-arn: arn:aws:wafv2:us-east-1:xxxxxx...
+    
+    # Configuração de Health Check (para o LB saber se os apps estão vivos)
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
+
+spec:
+  rules:
+    - http:
+        paths:
+          # Rota para o Evaluation Service (Caminho Quente)
+          # Ex: http://load-balancer-url/eval
+          - path: /eval
+            pathType: Prefix
+            backend:
+              service:
+                name: evaluation-service
+                port:
+                  number: 80
+
+          # Rota para o Auth Service
+          # Ex: http://load-balancer-url/auth
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 80
+
+          # Rota para o Flag Service (Gerenciamento)
+          # Ex: http://load-balancer-url/flags
+          - path: /flags
+            pathType: Prefix
+            backend:
+              service:
+                name: flag-service
+                port:
+                  number: 80
+
+          # Rota para o Targeting Service
+          # Ex: http://load-balancer-url/targeting
+          - path: /targeting
+            pathType: Prefix
+            backend:
+              service:
+                name: targeting-service
+                port:
+                  number: 80
