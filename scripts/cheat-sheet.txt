@@ -1,0 +1,30 @@
+=== COMANDOS ÚTEIS DO PROJETO TOGGLEMASTER ===
+
+1. MONITORAMENTO (VISUALIZAÇÃO)
+-------------------------------------------------
+# Ver os Pods "Nascendo" em tempo real (Watch mode)
+kubectl get pods -n togglemaster -l app=analytics-service -w
+
+# Monitorar o HPA (CPU) e KEDA (Fila)
+kubectl get hpa -n togglemaster -w
+
+# Listar todos os recursos do namespace
+kubectl get all -n togglemaster
+
+
+2. MANUTENÇÃO (RESET DO AMBIENTE)
+-------------------------------------------------
+# Escalar o Analytics de volta para 1 réplica (Reset KEDA)
+kubectl scale deployment analytics-service --replicas=1 -n togglemaster
+
+# Ver logs do Analytics (para debugar DynamoDB/SQS)
+kubectl logs -l app=analytics-service -n togglemaster -f
+
+
+3. AWS CLI (FILA SQS)
+-------------------------------------------------
+# Listar filas na região correta (Ohio)
+aws sqs list-queues --region us-east-2
+
+# Limpar a fila (Purge) via linha de comando (Opcional)
+aws sqs purge-queue --queue-url https://sqs.us-east-2.amazonaws.com/SUA-CONTA/analytics-queue
