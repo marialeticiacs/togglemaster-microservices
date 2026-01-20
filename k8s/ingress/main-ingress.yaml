@@ -4,22 +4,10 @@ metadata:
   name: togglemaster-ingress
   namespace: togglemaster
   annotations:
-    # Diz ao EKS para provisionar um ALB (Application Load Balancer)
-    kubernetes.io/ingress.class: alb
+    kubernetes.io/ingress.class: nginx
     
-    # Define que o LB deve ser público (acessível via internet)
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    
-    # Importante: "ip" faz o tráfego ir direto para os Pods (menor latência)
-    # Se não usar isso, ele vai para os NodePorts (modo legado)
-    alb.ingress.kubernetes.io/target-type: ip
-    
-    # (Opcional) Se você criou o WAF no passo anterior, descomente e coloque o ARN aqui:
-    # alb.ingress.kubernetes.io/wafv2-acl-arn: arn:aws:wafv2:us-east-1:xxxxxx...
-    
-    # Configuração de Health Check (para o LB saber se os apps estão vivos)
-    alb.ingress.kubernetes.io/healthcheck-path: /health
-    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
+    # Isso ajuda a evitar problemas de upload/body grandes
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
 
 spec:
   rules:
